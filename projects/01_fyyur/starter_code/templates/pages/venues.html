@@ -3,17 +3,10 @@
 {% block content %}
 {% for area in areas %}
 <h3>{{ area.city }}, {{ area.state }}</h3>
-	<ul class="items">
-		{% for venue in area.venues %}
-		<li>
-			<a href="/venues/{{ venue.id }}">
-				<i class="fas fa-music"></i>
-				<div class="item">
-					<h5>{{ venue.name }}</h5>
-				</div>
-			</a>
-		</li>
-		{% endfor %}
-	</ul>
+	{% for venue in area.venues %}
+	<a href="/venues/{{ venue.id }}">
+		<h5><i class="fas fa-music"></i> {{ venue.name }}</h5>
+	</a>
+	{% endfor%}
 {% endfor %}
 {% endblock %}
