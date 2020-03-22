@@ -80,7 +80,7 @@ class Show(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey(
         'artist.id'), nullable=False)
     start_time = db.Column(
-        db.DateTime(), default=datetime.today(), nullable=False)
+        db.DateTime(), nullable=False)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -161,13 +161,13 @@ def search_venues():
 def show_venue(venue_id):
     # shows the venue page with the given venue_id
     venue = Venue.query.get(venue_id)
-    showartistvenue = Show.query.join('artist').join('venue')
+    shows = Show.query.all()
     past_shows = []
     upcoming_shows = []
     past_shows_count = 0
     upcoming_show_count = 0
-    for show in showartistvenue:
-        if show.venue_id == venue_id:
+    for show in shows:
+        if show.venue.id == venue_id:
             start_time = show.start_time.strftime("%m/%d/%y, %H:%M")
             now_time = datetime.now().strftime("%m/%d/%y, %H:%M")
             if start_time < now_time:
@@ -447,27 +447,35 @@ def create_artist_submission():
         form_data = f'{((form.name.data).strip()).lower()}, {((form.city.data).strip()).lower()}'
         artists = Artist.query.all()
         artist_data = []
+
         for artist in artists:
             artist_data.append(
                 f'{artist.name.strip().lower()}, {artist.city.strip().lower()}')
+
         if form_data in artist_data:
             flash('That artist already exists!')
+
         else:
             if form.seeking_perf.data == 'True':
                 seeking_perf = True
+
             else:
                 seeking_perf = False
             newArtist = Artist(name=form.name.data, city=form.city.data, state=form.state.data, phone=form.phone.data, genres=form.genres.data,
                                image_link=form.image_link.data, facebook_link=form.facebook_link.data, seeking_perf=seeking_perf, seeking_description=form.seeking_description.data, website_link=form.website_link.data)
+
             db.session.add(newArtist)
             db.session.commit()
+
             flash('Artist ' + request.form['name'] +
                   ' was successfully listed!')
     except:
         flash('An error occurred. Artist ' +
               form.name.data + ' could not be listed.')
+
     home_artists = Artist.query.order_by(desc(Artist.created_at)).limit(10)
     home_venues = Venue.query.order_by(desc(Venue.created_at)).limit(10)
+
     return render_template('pages/home.html', venues=home_venues, artists=home_artists)
 
 
@@ -505,28 +513,37 @@ def create_show_submission():
     # called to create new shows in the db, upon submitting new show listing form
     form = ShowForm(request.form)
     artists = Artist.query.all()
-    artist_ids = []
     venues = Venue.query.all()
-    venue_ids = []
+    artist_list = []
+    venue_list = []
+
     for artist in artists:
-        artist_ids.append(artist.id)
+        artist_list.append(artist.id)
+
     for venue in venues:
-        venue_ids.append(venue.id)
-    if int(form.artist_id.data) in artist_ids and int(form.venue_id.data) in venue_ids:
+        venue_list.append(venue.id)
+
+    if int(form.artist_id.data) in artist_list and int(form.venue_id.data) in venue_list:
         newShow = Show(artist_id=form.artist_id.data,
                        venue_id=form.venue_id.data, start_time=form.start_time.data)
         db.session.add(newShow)
         db.session.commit()
+
         # on successful db insert, flash success
         flash('Show was successfully listed!')
-    elif int(form.artist_id.data) not in artist_ids:
+
+    elif int(form.artist_id.data) not in artist_list:
         flash('An error occurred. That artist_id does not exist.')
-    elif int(form.venue_id.data) not in venue_ids:
+
+    elif int(form.venue_id.data) not in venue_list:
         flash('An error occurred. The show_id does not exist.')
+
     else:
         flash('An error occurred. Show could not be listed.')
+
     home_artists = Artist.query.order_by(desc(Artist.created_at)).limit(10)
     home_venues = Venue.query.order_by(desc(Venue.created_at)).limit(10)
+
     return render_template('pages/home.html', venues=home_venues, artists=home_artists)
 
 
