@@ -8,7 +8,7 @@
 
 Follow instructions to install the latest version of python for your platform in the [python docs](https://docs.python.org/3/using/unix.html#getting-and-installing-the-latest-version-of-python)
 
-#### Virtual Enviornment
+#### Virtual Environment
 
 We recommend working within a virtual environment whenever using Python for projects. This keeps your dependencies for each project separate and organaized. Instructions for setting up a virual enviornment for your platform can be found in the [python docs](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
 
@@ -65,30 +65,7 @@ One note before you delve into your tasks: for each endpoint you are expected to
 7. Create a POST endpoint to get questions based on a search term. It should return any questions for whom the search term is a substring of the question. 
 8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
 9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
-
-REVIEW_COMMENT
-```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
-
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
-
-GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
-
-```
-
+---
 
 ## Testing
 To run the tests, run
@@ -98,3 +75,243 @@ createdb trivia_test
 psql trivia_test < trivia.psql
 python test_flaskr.py
 ```
+---
+## API Reference
+#### Endpoints
+
+**GET** /questions
+* General
+    * Fetches a dictionary of questions and a dictionary of all the categories.
+    * Request arguments: None, Optional: Page Number
+    * Returns JSON Object of the dictionary of categories, current category, paginated questions, success, and the total number of questions.
+* Sample: ```curl http://127.0.0.1:5000/questions```
+```
+Example Return:
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "current_category": null, 
+  "questions": [
+    {
+      "answer": "Apollo 13", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 2, 
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    }, 
+    {
+      "answer": "Tom Cruise", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 4, 
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    }
+}
+```
+**GET** /categories
+* General:
+    * Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+    * Request Arguments: None
+    * Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
+* Sample: ```curl http://127.0.0.1:5000/categories```
+```
+Example Return:
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "success": true
+}
+```
+**DELETE** /questions/question_id
+* General:    
+    * When the trash-can button next to a question in the app is clicked, it sends a JSON object of the question ID to this endpoint. That question ID is then used to delete the corresponding ID from the databse.
+    * After the delete, the endpoint fetches a dictionary of the remaining questions and a dictionary of all the categories. 
+    * Request Arguments: question_id
+    * Returns JSON Object of the dictionary of categories, current category, paginated questions, success, and the total number of questions.
+* Sample: ```curl -X DELETE http://127.0.0.1:5000/questions/6```
+```
+Example Return:
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "current_category": null, 
+  "questions": [
+    {
+      "answer": "Agra", 
+      "category": 3, 
+      "difficulty": 2, 
+      "id": 15, 
+      "question": "The Taj Mahal is located in which Indian city?"
+    }
+}
+
+```
+**POST** /questions
+* General:
+    * When the user submits a new question in the APP, it sends a JSON object of key-value pairs. Those pairs are 'Question':'String','Answer':'String','Difficulty': Integer,'Category':Integer. It then inserts the data into the database.
+    * After the insert, the endpoint fetches a dictionary of all the questions and a dictionary of all the categories.
+    * Returns JSON Object of the dictionary of categories, current category, paginated questions, success, and the total number of questions.
+* Sample: ```curl -H "Content-Type: application/json" -X POST -d "{\"question\": \"What is the third letter in the alphabet?\", \"answer\": \"C\", \"difficulty\": 1, \"category\": 1}" http://127.0.0.1:5000/questions```
+```
+Example Return:
+{
+  "categories": {
+    "1": "Science", 
+    "2": "Art", 
+    "3": "Geography", 
+    "4": "History", 
+    "5": "Entertainment", 
+    "6": "Sports"
+  }, 
+  "current_category": null, 
+  "questions": [
+    {
+      "answer": "Apollo 13", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 2, 
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    }, 
+    {
+      "answer": "Tom Cruise", 
+      "category": 5, 
+      "difficulty": 4, 
+      "id": 4, 
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    }
+}
+```
+**GET** /categories/category_id/questions
+* General:    
+    * Fetches a list of questions by submitted category ID's.
+    * Request Parameter : Category_id
+    * Returns a filtered JSON Object of the current category, paginated questions with the corresponding category ID, and the total number of questions.
+* Sample: ```curl http://127.0.0.1:5000/categories/1/questions```
+```
+Example Return:
+{
+  "currentCategory": 1, 
+  "questions": [
+    {
+      "answer": "The Liver", 
+      "category": 1, 
+      "difficulty": 4, 
+      "id": 20, 
+      "question": "What is the heaviest organ in the human body?"
+    }, 
+    {
+      "answer": "Alexander Fleming", 
+      "category": 1, 
+      "difficulty": 3, 
+      "id": 21, 
+      "question": "Who discovered penicillin?"
+    }, 
+    {
+      "answer": "Blood", 
+      "category": 1, 
+      "difficulty": 4, 
+      "id": 22, 
+      "question": "Hematology is a branch of medicine involving the study of what?"
+    }, 
+    {
+      "answer": "3", 
+      "category": 1, 
+      "difficulty": 1, 
+      "id": 35, 
+      "question": "How old is Ellie the cat?"
+    }
+  ], 
+  "totalQuestions": 4
+}
+```
+**POST** /searchQuestions
+* General:    
+    * Fetches a list of questions that have the search term in them. If the search term is blank, return all questions. If no questions have the search term in them, return an error.
+    * Request Parameter : searchTerm
+    * Returns a JSON object of success, the dictionary of questions with the search term, the dictionary of categories, current category and the search term.
+* Sample: ```curl -H "Content-Type: application/json" -X POST -d "{\"searchTerm\":\"The\"}" http://127.0.0.1:5000/searchQuestions```
+```
+Example Return:
+{
+   "success":True,
+   "questions":[
+      {
+         "id":5,
+         "question":"Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?",
+         "answer":"Maya Angelou",
+         "category":4,
+         "difficulty":2
+      }
+   ],
+   "total_questions":1,
+   "current_category":"None",
+   "categories":[
+      {
+         "id":1,
+         "type":"Science"
+      },
+      {
+         "id":2,
+         "type":"Art"
+      },
+      {
+         "id":3,
+         "type":"Geography"
+      },
+      {
+         "id":4,
+         "type":"History"
+      },
+      {
+         "id":5,
+         "type":"Entertainment"
+      },
+      {
+         "id":6,
+         "type":"Sports"
+      }
+   ],
+   "searchTerm":"autobiography"
+}
+
+```
+**POST** /quizzes
+* General:
+    * Fetches a randomly selected question from the selected category.
+    * Request Parameters: previous_questions, quiz_category
+    * Returns a JSON object of success and dictionary named 'question' that has the question_id, question,answer,category and difficulty.
+* Sample: ```curl -H "Content-Type: application/json" -X POST -d "{\"previous_questions\": [], \"quiz_category\": {\"type\": \"click\", \"id\": 0}}" http://127.0.0.1:5000/quizzes```
+```
+Example Return:
+{
+   "success":True,
+   "question":{S
+      "id":35,
+      "question":"How old is Ellie the cat?",
+      "answer":"3",
+      "category":1,
+      "difficulty":1
+   }
+}
+```
+#### Deployment N/A
+#### Authors
+* Derek Tradd
