@@ -38,6 +38,9 @@ psql trivia < trivia.psql
 
 ## Running the server
 
+In backend/models.py make sure to update the database_path variable with your credentials.\
+```database_path = "postgresql://{}:{}@{}/{}".format('YOUR_USERNAME', 'YOUR_PASSWORD', 'localhost:####', database_name)```
+
 From within the `backend` directory first ensure you are working using your created virtual environment.
 
 To run the server, execute:
