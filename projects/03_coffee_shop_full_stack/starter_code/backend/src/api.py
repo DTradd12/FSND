@@ -11,7 +11,7 @@ setup_db(APP)
 CORS(APP)
 
 
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 
 # ROUTES
@@ -35,7 +35,7 @@ def get_drinks():
 
 @APP.route('/drinks-detail', methods=['GET'])
 @requires_auth(permission='get:drinks-detail')
-def drinks_detail(*args):
+def drinks_detail(payload):
     """Privately gets all drinks from the database"""
     # Get all drinks from the database and format them.
     available_drinks = Drink.query.all()
@@ -54,7 +54,7 @@ def drinks_detail(*args):
 
 @APP.route('/drinks', methods=['POST'])
 @requires_auth(permission='post:drinks')
-def make_drink(*args):
+def make_drink(payload):
     """Adds a new drink to the database"""
     # Get the submitted drink data and format it for submission.
     body = request.get_json()
@@ -79,7 +79,7 @@ def make_drink(*args):
 
 @APP.route('/drinks/<int:drink_id>', methods=['PATCH'])
 @requires_auth(permission='patch:drinks')
-def edit_drink(*args, drink_id):
+def edit_drink(payload, drink_id):
     """Edits an existing drink in the database."""
     # Get the submitted drink data and format it for submission.
     body = request.get_json()
@@ -109,7 +109,7 @@ def edit_drink(*args, drink_id):
 
 @APP.route('/drinks/<int:drink_id>', methods=['DELETE'])
 @requires_auth(permission='delete:drinks')
-def delete_drink(*args, drink_id):
+def delete_drink(payload, drink_id):
     """Deletes an existing drink from the database."""
     # Search for the drink in the database.
     drink = Drink.query.filter_by(id=drink_id).one_or_none()
@@ -143,7 +143,7 @@ def auth_error(error):
 def bad_request(error):
     return jsonify({
         "success": False,
-        "error": 400,
+        "error": error,
         "message": "bad request"
     }), 400
 
