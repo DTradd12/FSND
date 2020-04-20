@@ -4,7 +4,6 @@ from flask import request
 from functools import wraps
 from jose import jwt
 
-
 AUTH0_DOMAIN = 'dtradd.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'CoffeeShop'
@@ -110,7 +109,8 @@ def verify_decode_jwt(token):
         except jwt.JWTClaimsError:
             raise AuthError({
                 'code': 'invalid_claims',
-                'description': 'Incorrect claims. Please, check the audience and issuer.'
+                'description': 'Incorrect claims. Please, '
+                               'check the audience and issuer.'
             }, 401)
         except Exception:
             raise AuthError({
