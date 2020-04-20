@@ -7,5 +7,11 @@
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5433/trivia_test</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="database" uuid="ce4ec104-41a5-4c3e-9674-65f724c97c97">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\Derek Tradd\OneDrive - Cimpress N.V\Python\Udacity\FSND\projects\03_coffee_shop_full_stack\starter_code\backend\src\database\database.db</jdbc-url>
+    </data-source>
   </component>
 </project>

@@ -1,15 +1,15 @@
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
 import json
 from functools import wraps
 from jose import jwt
-from urllib.request import urlopen
+import urllib3
 
 
 app = Flask(__name__)
 
-AUTH0_DOMAIN = @TODO_REPLACE_WITH_YOUR_DOMAIN
+AUTH0_DOMAIN = 'dtradd.auth0.com'
 ALGORITHMS = ['RS256']
-API_AUDIENCE = @TODO_REPLACE_WITH_YOUR_API_AUDIENCE
+API_AUDIENCE = 'image'
 
 
 class AuthError(Exception):
@@ -29,6 +29,7 @@ def get_token_auth_header():
         }, 401)
 
     parts = auth.split()
+    print(parts)
     if parts[0].lower() != 'bearer':
         raise AuthError({
             'code': 'invalid_header',
@@ -52,8 +53,10 @@ def get_token_auth_header():
 
 
 def verify_decode_jwt(token):
-    jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
-    jwks = json.loads(jsonurl.read())
+    url = f'https://{AUTH0_DOMAIN}/.well-known/jwks.json'
+    http = urllib3.PoolManager()
+    response = http.request('GET', url)
+    jwks = json.loads(response.data.decode('utf-8'))
     unverified_header = jwt.get_unverified_header(token)
     rsa_key = {}
     if 'kid' not in unverified_header:
@@ -116,6 +119,7 @@ def requires_auth(f):
         return f(payload, *args, **kwargs)
 
     return wrapper
+
 
 @app.route('/headers')
 @requires_auth

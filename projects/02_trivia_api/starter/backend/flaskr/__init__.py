@@ -76,7 +76,7 @@ def create_app(test_config=None):
     def delete_question(question_id):
         """Delete a question by question_id."""
         question = Question.query.filter(
-            Question.id == question_id).one_or_none()  # Search for the question with the question_id being sent.
+            Question.id == question_id).one_or_none()
 
         if question is None:
             abort(404)
@@ -176,8 +176,9 @@ def create_app(test_config=None):
 
     @app.route('/quizzes', methods=['POST'])
     def play_quiz():
-        """Set up the quiz portion of the game, return a randomly selected question based on the category selected (
-        or not selected.) """
+        """Set up the quiz portion of the game, return a randomly selected question
+        based on the category selected
+        (or not selected.) """
         body = request.get_json()
 
         # Get category_id form JSON
