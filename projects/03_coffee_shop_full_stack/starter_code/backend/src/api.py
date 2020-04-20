@@ -143,7 +143,7 @@ def auth_error(error):
 def bad_request(error):
     return jsonify({
         "success": False,
-        "error": error,
+        "error": 400,
         "message": "bad request"
     }), 400
 
