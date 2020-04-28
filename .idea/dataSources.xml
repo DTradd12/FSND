@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="trivia_test@localhost" uuid="7dc2fa6f-de88-4596-8961-1532a7616ab5">
+    <data-source source="LOCAL" name="postgres@localhost" uuid="d7a0ea4a-0083-4feb-aedc-75f824d29aef">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5433/trivia_test</jdbc-url>
-    </data-source>
-    <data-source source="LOCAL" name="database" uuid="ce4ec104-41a5-4c3e-9674-65f724c97c97">
-      <driver-ref>sqlite.xerial</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\Derek Tradd\OneDrive - Cimpress N.V\Python\Udacity\FSND\projects\03_coffee_shop_full_stack\starter_code\backend\src\database\database.db</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:5432/postgres</jdbc-url>
     </data-source>
   </component>
 </project>
