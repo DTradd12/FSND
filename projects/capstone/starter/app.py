@@ -1,6 +1,8 @@
 from flask import request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from models import create_app, setup_db, db_drop_and_create_all, Movie, Actor
+from sqlalchemy import exc
+from .database.models import create_app, setup_db, db_drop_and_create_all, Movie, Actor
+from .auth.auth import AuthError, requires_auth
 
 
 database_path = "postgresql://postgres:password@localhost:5432/castingagency"
@@ -20,125 +22,242 @@ def index():
     actor_list = [actor.formatted() for actor in actors]
 
     return jsonify({
-        "Movies": movie_list,
-        "Actors": actor_list
+        "success": True,
+        "status_code": 200,
+        "movies": movie_list,
+        "actors": actor_list
     })
 
 
 @APP.route("/actors", methods=['GET'])
+@requires_auth(permission='get:actors')
 def get_actors():
     actors = Actor.query.order_by(Actor.id)
     actor_list = [actor.formatted() for actor in actors]
 
-    return jsonify({
-        "Actors": actor_list
-    })
+    if len(actor_list) == 0:
+        abort(404)
+    else:
+        return jsonify({
+            "success": True,
+            "status_code": 200,
+            "actors": actor_list
+        })
 
 
 @APP.route("/movies", methods=['GET'])
+@requires_auth(permission='get:movies')
 def get_movies():
     movies = Movie.query.order_by(Movie.id)
     movie_list = [movie.formatted() for movie in movies]
 
-    return jsonify({
-        "Movies": movie_list
-    })
+    if len(movie_list) == 0:
+        abort(404)
+    else:
+        return jsonify({
+            "success": True,
+            "status_code": 200,
+            "movies": movie_list
+        })
 
 
 @APP.route("/actors/<int:actor_id>", methods=['GET'])
+@requires_auth(permission='get:actors')
 def get_actor(actor_id):
     actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
     if actor is None:
-        return jsonify({
-          "Actors": "No actors are currently present in the database."
-        })
+        abort(404)
     else:
-        return jsonify(actor.formatted())
+        return jsonify({
+            "success": True,
+            "status_code": 200,
+            "actor": actor.formatted()
+        })
 
 
 @APP.route("/movies/<int:movie_id>", methods=['GET'])
+@requires_auth(permission='get:movies')
 def get_movie(movie_id):
     movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
-    return jsonify(movie.formatted())
+    if movie is None:
+        abort(404)
+    else:
+        return jsonify({
+            "success": True,
+            "status_code": 200,
+            "movie": movie.formatted()
+        })
 
 
 @APP.route("/actors/<int:actor_id>", methods=['DELETE'])
+@requires_auth(permission='delete:actor')
 def delete_actor(actor_id):
     actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
     actor.delete()
 
-    return jsonify({
-        "Actor": actor.name,
-        "Deleted": True
-    })
+    if not actor:
+        abort(404)
+    else:
+        return jsonify({
+            "success": True,
+            "status_code": 200,
+            "deleted": actor.id
+        })
 
 
 @APP.route("/movies/<int:movie_id>", methods=['DELETE'])
+@requires_auth(permission='delete:movie')
 def delete_movie(movie_id):
     movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
     movie.delete()
 
-    return jsonify({
-        "Movie": movie.name,
-        "Deleted": True
-    })
+    if not movie:
+        abort(404)
+    else:
+        return jsonify({
+            "success": True,
+            "status_code": 200,
+            "deleted": movie.id
+        })
 
 
 @APP.route("/movies/create", methods=['POST'])
+@requires_auth(permission='post:movie')
 def add_movie():
     body = request.get_json()
 
-    new_movie = Movie(body['title'], body['release_date'])
-    new_movie.create()
+    try:
+        new_movie = Movie(body['title'], body['release_date'])
+        new_movie.create()
 
-    return jsonify(new_movie.formatted())
-
+        return jsonify({
+            "success": True,
+            "status_code": 200,
+            "movie": new_movie.formatted()
+        })
+    except exc.SQLAlchemyError:
+        abort(409)
+    
 
 @APP.route("/actors/create", methods=['POST'])
+@requires_auth(permission='post:actor')
 def add_actor():
     body = request.get_json()
 
-    new_actor = Actor(body['name'], body['age'], body['gender'])
-    new_actor.create()
-
-    return jsonify(new_actor.formatted())
+    try:
+        new_actor = Actor(body['name'], body['age'], body['gender'])
+        new_actor.create()
+    
+        return jsonify({
+            "success": True,
+            "status_code": 200,
+            "actor": new_actor.formatted()
+        })
+    except exc.SQLAlchemyError:
+        abort(409)
 
 
 @APP.route("/movies/<int:movie_id>", methods=['PATCH'])
+@requires_auth(permission='edit:movie')
 def edit_movie(movie_id):
     body = request.get_json()
 
     movie = Movie.query.filter(Movie.id == movie_id).one_or_none()
 
-    movie.title = body['title']
-    movie.release_date = body['release_date']
+    if not movie:
+        abort(404)
+    else:
+        movie.title = body['title']
+        movie.release_date = body['release_date']
 
-    movie.update()
+        movie.update()
 
-    return jsonify({
-        "updated": True,
-        "movie": movie.formatted()
-    })
+        return jsonify({
+            "success": True,
+            "status_code": 200,
+            "movie": movie.formatted()
+        })
 
 
 @APP.route("/actors/<int:actor_id>", methods=['PATCH'])
+@requires_auth(permission='edit:actor')
 def edit_actor(actor_id):
     body = request.get_json()
 
     actor = Actor.query.filter(Actor.id == actor_id).one_or_none()
 
-    actor.name = body['name']
-    actor.age = body['age']
-    actor.gender = body['gender']
+    if not actor:
+        abort(404)
+    else:
+        actor.name = body['name']
+        actor.age = body['age']
+        actor.gender = body['gender']
 
-    actor.update()
+        actor.update()
 
+        return jsonify({
+            "success": True,
+            "status_code": 200,
+            "actor": actor.formatted()
+        })
+
+
+# Error Handling
+@APP.errorhandler(AuthError)
+def auth_error(error):
     return jsonify({
-        "updated": True,
-        "actor": actor.formatted()
-    })
+        "success": False,
+        "error": error.status_code,
+        "message": error.error
+    }), error.status_code
+
+
+@APP.errorhandler(400)
+def bad_request(error):
+    return jsonify({
+        "success": False,
+        "error": 400,
+        "message": "bad request"
+    }), 400
+
+
+@APP.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": "not found"
+    }), 404
+
+
+@APP.errorhandler(405)
+def method_not_allowed(error):
+    return jsonify({
+        "success": False,
+        "error": 405,
+        "message": "method not allowed"
+    }), 405
+
+
+@APP.errorhandler(409)
+def duplicate_entry(error):
+    return jsonify({
+        "success": False,
+        "error": 409,
+        "message": "duplicate of an existing entry"
+    }), 409
+
+
+@APP.errorhandler(422)
+def unprocessable(error):
+    return jsonify({
+        "success": False,
+        "error": 422,
+        "message": "unprocessable"
+    }), 422
+
 # Default port:
 # if __name__ == '__main__':
 #     APP.run()
