@@ -2,12 +2,18 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 
+database_path = "postgresql://postgres:password@localhost:5432/castingagency"
+
 db = SQLAlchemy()
 
 
-def setup_db(app):
+def setup_db(app, database_path=database_path):
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_path
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['JSON_SORT_KEYS'] = False
     db.app = app
     db.init_app(app)
+    db.create_all()
 
 
 def db_drop_and_create_all():
@@ -15,32 +21,22 @@ def db_drop_and_create_all():
     db.create_all()
 
 
-def create_app(database_path):
-    # create and configure the app
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_path
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JSON_SORT_KEYS'] = False
-    CORS(app)
-
-    return app
-
-
 class Movie(db.Model):
     __table_name__ = 'movie'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, unique=True, nullable=False)
-    release_date = db.Column(db.DateTime())
+    release_date = db.Column(db.String(), nullable=False)
 
     def __init__(self, title, release_date):
         self.title = title
-        self.release_Date = release_date
+        self.release_date = release_date
 
     def formatted(self):
         return {
-            "Title": self.title,
-            "Release Date": self.release_date
+            "id" : self.id,
+            "title": self.title,
+            "release date": self.release_date
         }
 
     def create(self):
@@ -70,9 +66,10 @@ class Actor(db.Model):
 
     def formatted(self):
         return {
-            "Name": self.name,
-            "Age": self.age,
-            "Gender": self.gender
+            "id": self.id,
+            "name": self.name,
+            "age": self.age,
+            "gender": self.gender
         }
 
     def create(self):
